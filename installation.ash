@@ -3,5 +3,5 @@
 # installation of needed packages
 apk update
 apk upgrade
-apk add ansible
+apk add ansible sudo
 
