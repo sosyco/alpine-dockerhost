@@ -15,3 +15,4 @@ mkdir -p /home/dockeradmin/.ssh/
 cp files/dockeradmin.pub /home/dockeradmin/.ssh/authorized_keys
 chmod 700 -R /home/dockeradmin/.ssh 
 chown dockeradmin.dockeradmin -R /home/dockeradmin/.ssh
+echo "dockeradmin ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
