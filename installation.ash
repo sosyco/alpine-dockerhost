@@ -6,12 +6,14 @@
 # enhance the repositories and update the system
 if ! [ -f "/etc/apk/repositories.org" ]; 
 then 
-  cp /etc/apk/repositories /etc/apk/repositories.$(date "+%Y%m%d-%H:%M:%S")
+  cp /etc/apk/repositories /etc/apk/repositories.org
   sed -ni 'p; s/\/main/\/community/p' /etc/apk/repositories
 fi
 apk update
 apk upgrade
 apk add git sudo docker
+# add new user "dockeradmin" without password 
+# and generate sshkeys
 getent passwd dockeradmin > /dev/null 2&>1
 if ! [ $? -eq 0 ]; 
 then 
