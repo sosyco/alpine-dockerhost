@@ -8,5 +8,5 @@ cp /etc/apk/repositories /etc/apk/repositories.$(date "+%Y%m%d-%H:%M:%S")
 sed -ni 'p; s/\/main/\/community/p' /etc/apk/repositories
 apk update
 apk upgrade
-apk add git ansible sudo
+apk add git ansible sudo docker
 ssh-keygen -f files/dockeradmin -t rsa -b 4096 -C dockeradmin -N ''
