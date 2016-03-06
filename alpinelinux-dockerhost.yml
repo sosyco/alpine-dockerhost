@@ -1,0 +1,225 @@
+# installation of alpinelinux-dockerhost
+
+- hosts: dockerhost
+  gather_facts: yes
+  tasks:
+
+  # User-Managment
+  - file: path=/etc/ssh/administrator state=directory owner=administrator group=administrator mode=0755
+  - copy: src=files/administrator.pub dest=/etc/ssh/administrator/authorized_keys owner=administrator group=administrator mode=0644
+  - lineinfile: dest=/etc/ssh/sshd_config line="AuthorizedKeysFile    /etc/ssh/%u/authorized_keys"
+  - lineinfile: "dest=/etc/sudoers line='administrator ALL=(ALL) NOPASSWD: ALL'"
+  - user: name=administrator shell=/bin/bash groups=adm,cdrom,sudo,dip,plugdev,lpadmin,sambashare password=!
+  - service: name=ssh state=restarted
+#  - user: name=splaetzer shell=/bin/bash groups=sudo,adm,cdrom,dip,plugdev,lpadmin,sambashare password=$6$HMD..4NA$uiX9l9WQ.cCG5CQLvvA3EI7IoURaIbpEiZXj/qOPTKHs8PHfHVuJI/cDOPp6yEOsBS2coSlIMunvHYzP28Y/O0
+#  - lineinfile: "dest=/etc/sudoers line='splaetzer ALL=(ALL) NOPASSWD: ALL'"
+#  - file: path=/etc/ssh/splaetzer state=directory owner=splaetzer group=splaetzer mode=0755
+#  - copy: src=/home/ipeter/.ssh/splaetzer.pub dest=/etc/ssh/splaetzer/authorized_keys owner=splaetzer group=splaetzer mode=0644  
+#  - file: path=/home/splaetzer/.ssh state=directory owner=splaetzer group=splaetzer mode=0755
+#  - copy: src=/home/ipeter/.ssh/splaetzer dest=/home/splaetzer/.ssh/splaetzer owner=splaetzer group=splaetzer mode=0644  
+#  - user: name=ipeter shell=/bin/bash groups=sudo,adm,cdrom,dip,plugdev,lpadmin,sambashare password=$6$p8ZB/AwQ$zuE42KJE47SlYDpMlFne634P5vH8OBFWP1NH1nfduaOsTPMlGkkuILzmkf7wsZDza1J.DeTPPjBEvi8olcCeM/
+#  - lineinfile: "dest=/etc/sudoers line='ipeter ALL=(ALL) NOPASSWD: ALL'"
+#  - file: path=/etc/ssh/ipeter state=directory owner=ipeter group=ipeter mode=0755
+#  - copy: src=/home/ipeter/.ssh/HDW.pub dest=/etc/ssh/ipeter/authorized_keys owner=ipeter group=ipeter mode=0644  
+  
+  # Sources and Keys
+  # Erweiterte Repositories
+  - apt_key: keyserver=hkp://keyserver.ubuntu.com:80 id=16126D3A3E5C1192 state=present validate_certs=no
+  - apt_key: url=http://archive.getdeb.net/getdeb-archive.key state=present validate_certs=no
+  - apt_repository: repo='deb http://archive.canonical.com/ubuntu trusty partner' state=present validate_certs=no  update_cache=no
+  - apt_repository: repo='deb-src http://archive.canonical.com/ubuntu trusty partner' state=present validate_certs=no  update_cache=no
+  - apt_repository: repo='deb http://extras.ubuntu.com/ubuntu trusty main' state=present validate_certs=no  update_cache=no
+  - apt_repository: repo='deb-src http://extras.ubuntu.com/ubuntu trusty main' state=present validate_certs=no  update_cache=no
+  - apt_repository: repo='deb http://archive.getdeb.net/ubuntu trusty-getdeb apps' state=present validate_certs=no  update_cache=no
+    # http://askubuntu.com/questions/362745/how-to-install-h-265-hevc-codec-on-ubuntu-linux
+  - apt_repository: repo='ppa:strukturag/libde265' state=present validate_certs=no  update_cache=no
+  - apt_repository: repo='ppa:stebbins/handbrake-releases' state=present validate_certs=no  update_cache=no
+  - apt_repository: repo='ppa:libreoffice/libreoffice-5-0' state=present validate_certs=no  update_cache=no
+  - apt_repository: repo='ppa:freecad-maintainers/freecad-stable' state=present validate_certs=no  update_cache=no
+  - apt_repository: repo='ppa:ansible/ansible' state=present validate_certs=no  update_cache=no
+  - apt_repository: repo='ppa:x2go/stable' state=present validate_certs=no  update_cache=no
+  - apt_repository: repo='ppa:pipelight/stable' state=present validate_certs=no  update_cache=no
+  - apt_repository: repo='ppa:canonical-kernel-team/ppa' state=present validate_certs=no  update_cache=no
+  - apt_repository: repo='ppa:otto-kesselgulasch/gimp' state=present validate_certs=no  update_cache=no
+  - apt_repository: repo='ppa:otto-kesselgulasch/lightzone' state=present validate_certs=no  update_cache=no
+  - apt_repository: repo='ppa:inkscape.dev/stable' state=present validate_certs=no  update_cache=no
+  - apt_repository: repo='ppa:ubuntuhandbook1/ppa' state=present validate_certs=no  update_cache=yes
+  - apt_repository: repo='deb http://security.ubuntu.com/ubuntu wily-security main' state=present validate_certs=no update_cache=no
+  - apt_key: url=https://jenkins-ci.org/debian/jenkins-ci.org.key state=present validate_certs=no
+  - apt_repository: repo='deb http://pkg.jenkins-ci.org/debian binary/' state=present validate_certs=no update_cache=no
+
+  # update and safe-upgrade
+  - apt: upgrade=safe update_cache=yes cache_valid_time=3600
+  - apt: name=nano state=absent
+  - apt: name=xen-tools state=absent
+  - apt: name=xen-hypervisor state=absent
+  - apt: name=xen-utils state=absent
+
+  - name: Check if anything needs autoremoving
+    shell: apt-get -y --dry-run autoremove | grep -q "0 zu entfernen"
+    register: check_autoremove
+    ignore_errors: True
+    changed_when: False
+    always_run: True
+
+  # install pakages
+  # Erweitert
+  - name: install pakages
+    apt: name={{ item }} update_cache=yes cache_valid_time=3600 install_recommends=yes
+    with_items:
+    - vim
+    - linux-firmware
+    - linux-firmware-nonfree
+    - flashrom
+    - lm-sensors
+    - fancontrol
+    - thermald
+    - screen
+    - x11vnc
+    - kubuntu-desktop
+    - language-pack-kde-de
+    - firefox-locale-de
+    - libreoffice-l10n-de
+    - hyphen-de
+    - language-pack-gnome-de
+    - language-pack-gnome-de-base
+    - libreoffice-help-de
+    - cups-pdf
+    - mythes-de
+    - python-apt
+    - git
+    - subversion
+    - pigz
+    - pv
+    - par2
+    - cifs-utils
+    - pv
+    - ttf-mscorefonts-installer
+    - ssh-askpass
+    - sshpass
+##    - qemu-kvm
+    - handbrake-cli
+    - handbrake-gtk
+    - vlc
+      # http://askubuntu.com/questions/362745/how-to-install-h-265-hevc-codec-on-ubuntu-linux
+    - vlc-plugin-libde265
+    - aptitude
+    - libatasmart-bin
+    - smartmontools
+    - mesa-utils
+    - gdebi-core
+    - software-properties-gtk
+    - kubuntu-restricted-extras
+    - kscreensaver
+    - libgle3
+    - libjpeg-progs
+    - libjpeg-turbo-progs
+    - xscreensaver-data
+    - xscreensaver-data-extra
+    - xscreensaver-gl
+    - xscreensaver-gl-extra
+    - xscreensaver-screensaver-bsod
+    - network-manager-openvpn
+    - network-manager-openconnect
+    - python-software-properties 
+    - software-properties-common
+    - language-pack-de
+    - libavcodec-extra
+    - libdvdread4
+    - pavucontrol
+    - regionset
+    - python-pycurl
+    - ansible
+    - virt-manager
+ #   - qemu-kvm-spice 
+    - python-spice-client-gtk 
+    - spice-client-gtk
+    - freecad
+    - freecad-doc
+    - oce-draw
+    - netgen
+    - netgen-doc
+    - ccx
+    - x2goclient
+    - x2goserver
+    - pipelight-multi
+    - gimp
+    - gimp-help-de
+    - gimp-dcraw 
+    - gimp-gap 
+    - gimp-gutenprint
+    - gimp-plugin-registry
+    - gimp-resynthesizer
+    - gimp-flegita
+    - gimp-lensfun
+    - gimp-python
+    - gimp-texturize
+    - lightzone
+    - inkscape
+    - libwmf-bin 
+    - pstoedit 
+    - sketch
+    - python-uniconvertor
+    - scribus 
+    - scribus-doc 
+    - scribus-template 
+    - icc-profiles
+    - amd64-microcode
+    # newer HW-Stack
+    # https://wiki.ubuntu.com/Kernel/LTSEnablementStack#Trusty
+    - fdutils 
+    - xfonts-100dpi 
+    - xfonts-75dpi
+    - linux-generic-lts-wily
+    - xserver-xorg-core-lts-wily 
+    - xserver-xorg-lts-wily 
+    - xserver-xorg-video-all-lts-wily 
+    - xserver-xorg-input-all-lts-wily 
+    - linux-tools-generic-lts-wily
+    - linux-tools-virtual-lts-wily
+    - libwayland-egl1-mesa-lts-wily 
+    - libgl1-mesa-glx-lts-wily 
+    - libgl1-mesa-glx-lts-wily:i386 
+    - libglapi-mesa-lts-wily:i386 
+    - gpointing-device-settings 
+    - xinput
+    
+#    - jenkins
+
+  # VirtManageer
+#  - user: name=splaetzer groups=sudo,adm,cdrom,dip,plugdev,lpadmin,sambashare,libvirtd
+  - user: name=ipeter groups=sudo,adm,cdrom,dip,plugdev,lpadmin,sambashare,libvirtd
+#  - user: name=hfjockers groups=sudo,adm,cdrom,dip,plugdev,lpadmin,sambashare,libvirtd
+
+  - name: Autoremove unused packages
+    command: apt-get -y autoremove
+    when: "check_autoremove.rc != 0"
+
+  - name: set System
+    lineinfile: dest=/etc/vim/vimrc line="set background=dark"
+  - command: /usr/share/doc/libdvdread4/install-css.sh
+
+#  - copy: src=/etc/network/interfaces dest=/etc/network/interfaces owner=root group=root mode="u=rw,g=r,o=r"
+
+  # x2go-client
+#  - apt_repository: repo='ppa:x2go/stable'
+#  - apt: pkg=x2goclient update_cache=yes cache_valid_time=3600
+
+  # x2go-client
+#  - apt_repository: repo='ppa:pipelight/stable'
+#  - apt: pkg=pipelight-multi update_cache=yes cache_valid_time=3600
+#  - command: 'pipelight-plugin --update'
+
+  # newer mesa drive
+#  - apt_repository: repo='ppa:oibaf/graphics-drivers'
+#  - apt: upgrade=safe update_cache=yes cache_valid_time=3600
+
+  # ipeter data
+#  - synchronize: src=/home/ipeter/.ssh dest=/home/ipeter/ rsync_path="sudo rsync"
+#  - synchronize: src=/home/ipeter/.x2go dest=/home/ipeter/ rsync_path="sudo rsync"
+#  - synchronize: src=/home/ipeter/.x2goclient dest=/home/ipeter/ rsync_path="sudo rsync"
+#  - synchronize: src=/home/ipeter/ansible dest=/home/splaetzer/ rsync_path="sudo rsync" 
+#  - synchronize: src=/home/ipeter/.ansible dest=/home/ipeter/ rsync_path="sudo rsync"
+#  - synchronize: src=/home/ipeter/.mozilla dest=/home/ipeter/ rsync_path="sudo rsync" 
+#  - synchronize: src=/home/ipeter/.wine-pipelight dest=/home/ipeter/
+
