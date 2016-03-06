@@ -12,6 +12,8 @@ fi
 apk update
 apk upgrade
 apk add git sudo docker
+rc-update add docker boot
+
 # add new user "dockeradmin" without password 
 # and generate sshkeys
 getent passwd dockeradmin > /dev/null 2&>1
