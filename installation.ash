@@ -4,6 +4,7 @@
 # (c) 2015/2016 sosyco@googlemail.com  www.sosyco.de
 # 
 # enhance the repositories and update the system
+cp /etc/apk/repositories /etc/apk/repositories.$(date "+%Y%m%d-%H:%M:%S")
 sed -ni 'p; s/\/main/\/community/p' /etc/apk/repositories
 apk update
 apk upgrade
