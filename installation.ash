@@ -10,8 +10,8 @@ apk update
 apk upgrade
 apk add git ansible sudo docker
 ssh-keygen -f files/dockeradmin -t rsa -b 4096 -C dockeradmin -N ''
-useradd -D dockeradmin
+adduser -D dockeradmin
 mkdir -p /home/dockeradmin/.ssh/
 cp files/dockeradmin.pub /home/dockeradmin/.ssh/authorized_keys
 chmod 664 -R /home/dockeradmin/.ssh 
-chown dockeradmin.dockeradin -R /home/dockeradmin/.ssh
+chown dockeradmin.dockeradmin -R /home/dockeradmin/.ssh
