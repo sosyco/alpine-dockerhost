@@ -20,7 +20,7 @@ getent passwd dockeradmin > /dev/null 2&>1
 if ! [ $? -eq 0 ]; 
 then 
   ssh-keygen -f dockeradmin -t rsa -b 4096 -C dockeradmin -N ''
-  adduser -D -S /bin/ash dockeradmin
+  adduser -D -s /bin/ash dockeradmin
   sed -i "s/dockeradmin\:!/dockeradmin\:/g" /etc/shadow
   mkdir -p /home/dockeradmin/.ssh/
   cp dockeradmin.pub /home/dockeradmin/.ssh/authorized_keys
