@@ -33,7 +33,7 @@ sed -i "s/DOCKER_OPTS.*/DOCKER_OPTS=\"--bip=192.168.199.1\/24\"/" /etc/conf.d/do
 echo "don't forget to save the private sshkey: dockeardmin"
 
 # generate containeradmin (if we need one)
-sh-keygen -f containeradmin -t rsa -b 4096 -C containeradmin -N ''
+ssh-keygen -f containeradmin -t rsa -b 4096 -C containeradmin -N ''
 mkdir -p /home/dockeradmin/container/ssh/containeradmin
 cp containeradmin.pub /home/dockeradmin/container/ssh/containeradmin/authorized_keys
 cp containeradmin /home/dockeradmin/.ssh/containeradmin
