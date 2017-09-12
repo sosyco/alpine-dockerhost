@@ -39,4 +39,4 @@ cp containeradmin.pub /home/dockeradmin/container/ssh/containeradmin/authorized_
 cp containeradmin /home/dockeradmin/.ssh/containeradmin
 chmod 700 -R /home/dockeradmin/.ssh 
 chown dockeradmin.dockeradmin -R /home/dockeradmin/.ssh
-chmod 755 -R /home/dockeradmin/container/ssh/containeradmin
+chmod 755 -R /home/dockeradmin/container/ssh/containeradmin  
